@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta CRUD</title>
+    <link rel="stylesheet" href="/styles/consulta.css">
+</head>
+<body>
+    <div id="sidebar">
+        <h2>Consultas</h2>
+        <button id="novaConsultaBtn" onclick="novaConsulta()">Nova Consulta</button>
+        <ul id="consultasList"></ul>
+    </div>
+    <div id="main">
+        <h2>Detalhes da Consulta</h2>
+        <form id="formulario" onsubmit="salvarConsulta(event)">
+            <span>Chave:</span>
+            <input type="text" id="chave" placeholder="Chave (letras e números)" required pattern="[A-Za-z0-9]+">
+            <span>ConsultaSQL:</span>
+            <textarea id="consultaSQL" placeholder="Consulta SQL" required></textarea>
+
+            <span>Parâmetros:</span>
+            <div id="parametros">
+                <div class="parametro">
+                    <input type="text" placeholder="Variável" class="parametro-variavel">
+                    <input type="text" placeholder="Valor Default" class="parametro-valor">
+                    <button type="button" onclick="removerParametro(this)">Remover</button>
+                </div>
+            </div>
+            <button type="button" style="float: right;width: fit-content;margin-bottom: 5px;" onclick="adicionarParametro()">+ Parâmetro</button>
+
+            <span>Base de Dados:</span>
+            <select id="baseDeDados" name="baseDeDados" multiple required>
+                <option value="SQLTO">Paraíso do Tocantins</option>
+                <option value="SQLPO">Porangatu</option>
+                <option value="SQLCO">Contagem</option>
+                <option value="SQLPM">Para de Minas</option>
+            </select>
+
+            <span>Código JS:</span>
+            <textarea id="codigoJS" placeholder="Código JS" required>result = data.recordset</textarea>
+            <p style="font-size: 10pt;margin-top: 0px;">
+                <b>result</b>: Variável de retorno do processamento<br>
+                <b>data</b>: Variável de acesso aos dados retornados do SQL.
+            </p>
+
+            <div id="botoesAcao">
+                <button type="button" id="executarBtn" style="display: none;" onclick="executarRota()">Executar SQL</button>
+                <button type="submit">Salvar</button>
+                <button type="button" id="excluirBtn" style="display: none;" onclick="deletarConsulta()">Excluir</button>
+            </div>
+        </form>
+        <div id="resultadoJson"></div>
+    </div>
+
+    <script src="/scripts/consulta.js"></script>
+</body>
+</html>

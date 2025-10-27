@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta CRUD</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        #header {
+            background-color: #00C26E;
+            color: white;
+            height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+
+        #header .container {
+            width: 1268px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        #header .logo h1 {
+            margin: 0;
+            font-size: 2em;
+        }
+
+        #header .logo h2 {
+            margin: 0;
+            font-size: 1.2em;
+        }
+
+        #content {
+            background-color: white;
+            display: flex;
+            width: 100%;
+            max-width: 1268px;
+            margin: 0 auto;
+        }
+
+        #sidebar {
+            width: 200px;
+            padding: 20px;
+            border-right: #d0d0d0 1px solid;
+            height: 100%;
+        }
+
+        #main {
+            flex-grow: 1;
+            padding: 20px;
+        }
+
+        #sidebar ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        #sidebar ul li {
+            padding: 10px;
+            background-color: #f0f0f0;
+            margin-bottom: 5px;
+            cursor: pointer;
+        }
+
+        #sidebar ul li.selected {
+            background-color: #d0d0d0;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="header">
+        <div class="container">
+            <div class="logo">
+                <h1>API Industria</h1>
+                <h2>Guia da API</h2>
+            </div>
+        </div>
+    </div>
+    <div id="content">
+        <div id="sidebar">
+            <ul id="menu">
+                <li class="selected">Início</li>
+            </ul>
+        </div>
+        <div id="main">
+            <h2>Bem-vindo ao Guia da API</h2>
+            <p>Para utilizar esta API, você precisará de uma chave de API. Faça suas requisições no endereço
+                <code>/api</code>.</p>
+            <div id="details"></div>
+        </div>
+    </div>
+
+    <script>
+        async function fetchData() {
+            try {
+                const response = await fetch('/rotas');
+                const data = await response.json();
+                populateMenu(data.result);
+            } catch (error) {
+                console.error('Erro ao buscar dados:', error);
+            }
+        }
+
+        function populateMenu(items) {
+            const menu = document.getElementById('menu');
+            menu.innerHTML = ''; // Clear existing menu items
+            items.forEach(item => {
+                const li = document.createElement('li');
+                li.textContent = item.chave;
+                li.addEventListener('click', () => showDetails(item));
+                menu.appendChild(li);
+            });
+        }
+
+        function showDetails(item) {
+            const details = document.getElementById('details');
+            details.innerHTML = `<h3>/api/${item.chave}</h3><pre>${JSON.stringify(JSON.parse(item.parametros), null, 2)}</pre>`;
+        }
+
+        document.addEventListener('DOMContentLoaded', fetchData);
+    </script>
+</body>
+
+</html>

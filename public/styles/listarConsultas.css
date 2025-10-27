@@ -1,0 +1,76 @@
+body {
+    display: flex;
+    font-family: Arial, sans-serif;
+}
+
+#sidebar {
+    width: 25%;
+    padding: 20px;
+    background-color: #f4f4f4;
+    border-radius: 10px;
+}
+
+#main {
+    width: 75%;
+    padding: 20px;
+}
+
+#consultasList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#consultasList li {
+    margin: 10px 0;
+    padding: 10px;
+    cursor: pointer;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+}
+
+#consultasList li:nth-child(odd) {
+    background-color: #e9e9e9;
+}
+
+#consultasList li:hover {
+    background-color: #d9d9d9;
+}
+
+#consultaTitulo {
+    margin-top: 0;
+}
+
+#parametrosList {
+    margin: 10px 0;
+    padding: 10px;
+    background-color: #f4f4f4;
+    border-radius: 5px;
+}
+
+#consultaLink {
+    display: block;
+    margin: 10px 0;
+    padding: 10px;
+    background-color: #007BFF;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+#consultaLink:hover {
+    background-color: #0056b3;
+}
+
+#resultadoJson {
+    margin-top: 20px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    background-color: #000;
+    color: #ffffff;
+    font-family: 'Courier New', Courier, monospace;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 0.9em;
+    border-radius: 5px;
+}
