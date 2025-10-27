@@ -1,7 +1,7 @@
 module.exports = {
     apps: [
         {
-            name: 'api-dash',
+            name: 'API-Plena (Node)',
             script: './src/app.js',
             instances: 1,
             exec_mode: 'fork',
