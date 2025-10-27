@@ -7,8 +7,8 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const auth = require('./services/UserService');
 const ConsultaService = require('./services/ConsultaService');
-
 const routes = require('./routes');
+
 const corsOptions = {
     origin: '*', // Permitir apenas este domínio
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // Permitir apenas esses métodos

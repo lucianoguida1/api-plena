@@ -1,6 +1,7 @@
 const sql = require('mssql');
 const ConsultaService = require('../services/ConsultaService');
 const vm = require('vm');
+const { count } = require('console');
 
 const config = {
     //user: 'PLENA_SQL_MONITORIND',
@@ -106,8 +107,11 @@ module.exports = {
                     const server = serverMapping[baseDeDados];
                     const database = databaseMapping[baseDeDados];
                     if (!server || !database) {
-                        json.error = `Configuração não encontrada para a base de dados ${baseDeDados}!`;
-                        res.json(json);
+                        res.status(404).json({
+                            statusCode: 404,
+                            status: "error",
+                            error: `Configuração não encontrada para a base de dados ${baseDeDados}!`
+                        });
                         return;
                     }
 
@@ -120,8 +124,22 @@ module.exports = {
                             results.push(dado);
                         }
                     } catch (error) {
-                        json.error += ` - Erro ao executar consulta na base de dados ${baseDeDados}: ${error.message}`;
+                        res.status(500).json({
+                            statusCode: 500,
+                            status: "error",
+                            error: `Erro ao executar consulta na base de dados ${baseDeDados}: ${error.message}`
+                        });
                     }
+                }
+
+                if (results.length === 0) {
+                    isProcessing = false;
+                    res.status(404).json({
+                        statusCode: 404,
+                        status: "error",
+                        error: `nenhum dado retornado pela consulta!`
+                    });
+                    return;
                 }
 
                 const sandbox = {
@@ -137,29 +155,45 @@ module.exports = {
                     script.runInContext(context);
                     json.result = sandbox.result;
                     isProcessing = false;
-                    res.json(json);
+
+                    res.status(200).json({
+                        statusCode: 200,
+                        status: "success",
+                        count: results.length,
+                        result: json.result
+                    });
                 } catch (e) {
-                    console.error('Erro ao executar código de tratamento:', e);
                     isProcessing = false;
-                    res.json({ error: 'Erro ao executar código de tratamento', details: e.message });
+                    res.status(500).json({
+                        statusCode: 500,
+                        status: "error",
+                        error: `Erro ao executar código de tratamento: ${e.message}`
+                    });
                 }
 
             } else {
                 isProcessing = false;
-                json.error = "Chave da consulta não encontrada!";
-                res.json(json);
+                res.status(404).json({
+                    statusCode: 404,
+                    status: "error",
+                    error: `Chave da consulta não encontrada!`
+                });
             }
 
         } catch (error) {
             isProcessing = false;
-            json.error = 'Erro ao executar consulta: ' + error.message;
-            res.json(json);
+
+            res.status(500).json({
+                statusCode: 500,
+                status: "error",
+                error: `Erro ao executar consulta: ${error.message}`
+            });
         }
     },
 
     criaromaneio: async (req, res) => {
         const body = req.body;
-        
+
         if (!body.chave_fato_pedido || body.chave_fato_pedido === '') {
             res.status(400).json({
                 status: "error",
