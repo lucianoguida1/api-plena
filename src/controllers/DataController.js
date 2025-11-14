@@ -25,21 +25,27 @@ const databaseMapping = {
     'SQLTO': 'SATKPARAISO',
     'SQLPO': 'SATKPORANGATU',
     'SQLCO': 'SATKCONTAGEM',
-    'SQLPM': 'SATKPARAMINAS'
+    'SQLPM': 'SATKPARAMINAS',
+    'SQLCDM': 'SATKCDM',
+    'SQLHML': 'SATKCONTAGEM_HML',
 };
 
 const serverMapping = {
     'SQLTO': 'SQLTO.unifrigo.mg',
     'SQLPO': 'SQLPO.unifrigo.mg',
     'SQLCO': 'SQLCO.unifrigo.mg',
-    'SQLPM': 'SQLPM.unifrigo.mg'
+    'SQLPM': 'SQLPM.unifrigo.mg',
+    'SQLCDM': 'SATKCDM',
+    'SQLHML': 'SPL-SQLTI\\SQLATAK',
 };
 
 const descricaoBase = {
     'SQLTO': 'Paraíso do Tocantins',
     'SQLPO': 'Porangatu',
     'SQLCO': 'Contagem',
-    'SQLPM': 'Para de Minas'
+    'SQLPM': 'Para de Minas',
+    'SQLCDM': 'SATKCDM',
+    'SQLHML': 'Ambiente de Homologação',
 };
 
 async function executeQueryOnServer(server, database, consultaSQL) {
