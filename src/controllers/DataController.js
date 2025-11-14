@@ -75,115 +75,91 @@ let isProcessing = false;
 
 module.exports = {
     dados: async (req, res) => {
-        if (isProcessing) {
-            res.status(429).json({ error: 'Aguarde a conclusão da requisição anterior.' });
-            isProcessing = false;
-            return;
-        }
-
-        isProcessing = true;
         let json = { error: '', result: [] };
 
         try {
-            let chave = req.params.chave;
-            let consulta = await ConsultaService.buscarChave(chave);
+            const chave = req.params.chave;
+            const consulta = await ConsultaService.buscarChave(chave);
 
-            if (consulta) {
-                const results = Array();
-
-                // Parse the JSON string to an array
-                const baseDeDadosList = JSON.parse(consulta.baseDeDados);
-
-                // Parse the parameters JSON string to an array
-                const parametrosList = JSON.parse(consulta.parametros);
-
-                // Extract query parameters from the URL
-                const queryParams = req.query;
-
-                // Substitute parameters in the consulta
-                const consultaSQL = substituteParams(consulta.consulta, parametrosList, queryParams);
-
-                for (const baseDeDados of baseDeDadosList) {
-                    const server = serverMapping[baseDeDados];
-                    const database = databaseMapping[baseDeDados];
-                    if (!server || !database) {
-                        res.status(404).json({
-                            statusCode: 404,
-                            status: "error",
-                            error: `Configuração não encontrada para a base de dados ${baseDeDados}!`
-                        });
-                        return;
-                    }
-
-                    try {
-                        const result = await executeQueryOnServer(server, database, consultaSQL);
-
-                        var dados = result.recordset;
-                        for (const dado of dados) {
-                            dado.base = descricaoBase[baseDeDados];
-                            results.push(dado);
-                        }
-                    } catch (error) {
-                        res.status(500).json({
-                            statusCode: 500,
-                            status: "error",
-                            error: `Erro ao executar consulta na base de dados ${baseDeDados}: ${error.message}`
-                        });
-                    }
-                }
-
-                if (results.length === 0) {
-                    isProcessing = false;
-                    res.status(404).json({
-                        statusCode: 404,
-                        status: "error",
-                        error: `nenhum dado retornado pela consulta!`
-                    });
-                    return;
-                }
-
-                const sandbox = {
-                    data: results,
-                    console: console,
-                    result: null
-                };
-
-                const script = new vm.Script(consulta.tratamento);
-                const context = new vm.createContext(sandbox);
-
-                try {
-                    script.runInContext(context);
-                    json.result = sandbox.result;
-                    isProcessing = false;
-
-                    res.status(200).json({
-                        statusCode: 200,
-                        status: "success",
-                        count: results.length,
-                        result: json.result
-                    });
-                } catch (e) {
-                    isProcessing = false;
-                    res.status(500).json({
-                        statusCode: 500,
-                        status: "error",
-                        error: `Erro ao executar código de tratamento: ${e.message}`
-                    });
-                }
-
-            } else {
-                isProcessing = false;
-                res.status(404).json({
+            if (!consulta) {
+                return res.status(404).json({
                     statusCode: 404,
                     status: "error",
                     error: `Chave da consulta não encontrada!`
                 });
             }
 
-        } catch (error) {
-            isProcessing = false;
+            // Parse das configs
+            const baseDeDadosList = JSON.parse(consulta.baseDeDados || '[]');
+            const parametrosList = JSON.parse(consulta.parametros || '[]');
+            const queryParams = req.query;
 
-            res.status(500).json({
+            // Monta a SQL com parâmetros
+            const consultaSQL = substituteParams(consulta.consulta, parametrosList, queryParams);
+
+            const results = [];
+
+            for (const baseDeDados of baseDeDadosList) {
+                const server = serverMapping[baseDeDados];
+                const database = databaseMapping[baseDeDados];
+
+                if (!server || !database) {
+                    // Se isso for crítico, melhor lançar erro pra cair no catch geral
+                    throw new Error(`Configuração não encontrada para a base de dados ${baseDeDados}!`);
+                }
+
+                const result = await executeQueryOnServer(server, database, consultaSQL);
+
+                const dados = result.recordset || [];
+                for (const dado of dados) {
+                    // garante que não compartilha a mesma referência em nada estranho
+                    results.push({
+                        ...dado,
+                        base: descricaoBase[baseDeDados]
+                    });
+                }
+            }
+
+            if (results.length === 0) {
+                return res.status(404).json({
+                    statusCode: 404,
+                    status: "error",
+                    error: `nenhum dado retornado pela consulta!`
+                });
+            }
+
+            // Cada requisição tem seu próprio sandbox/context
+            const sandbox = {
+                data: results,
+                console: console,
+                result: null
+            };
+
+            const script = new vm.Script(consulta.tratamento);
+            const context = vm.createContext(sandbox);
+
+            try {
+                script.runInContext(context);
+
+                json.result = sandbox.result;
+
+                return res.status(200).json({
+                    statusCode: 200,
+                    status: "success",
+                    count: results.length,
+                    result: json.result
+                });
+            } catch (e) {
+                return res.status(500).json({
+                    statusCode: 500,
+                    status: "error",
+                    error: `Erro ao executar código de tratamento: ${e.message}`
+                });
+            }
+
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({
                 statusCode: 500,
                 status: "error",
                 error: `Erro ao executar consulta: ${error.message}`
